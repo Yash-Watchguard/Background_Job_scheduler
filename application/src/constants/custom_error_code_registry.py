@@ -1,0 +1,10 @@
+Python_Error = 1001
+Validation_Error = 1002
+Db_Error = 1003
+Conflict_Error = 1004
+Unexpected_Error = 1005
+Not_Found = 1006
+Unauthorized_Error = 1007
+Bad_Request = 1008
+S3_script_Upload_error= 1009
+scheduled_mismatch = 1010

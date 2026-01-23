@@ -1,0 +1,36 @@
+import json
+from errors.app_exception import AppException
+from fastapi import status
+
+class SchedulerService:
+    def __init__(self, scheduler_client, event_bridge_role_arn:str,schedule_group_name:str ):
+        self.scheduler_client = scheduler_client
+        self.role_arn = event_bridge_role_arn
+        self.group_name = schedule_group_name
+        
+        
+    def create_new_schedule(self, job_id:str, target_queue_arn:str, schedule_expression:str):
+        
+        schedule_name = f"bg-job-{job_id}"
+        
+        try:
+            response = self.scheduler_client.create_schedule(
+            Name = schedule_name,
+            GroupName = self.group_name,
+            ScheduleExpression = schedule_expression,
+            FlexibleTimeWindow={
+                "Mode": "OFF"
+            },
+            Target = {
+                "Arn" :target_queue_arn,
+                "RoleArn": self.role_arn,
+                "Input":json.dumps({
+                    "job_id":job_id
+                })
+            }
+        )
+        
+        except Exception as exception:
+            raise AppException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,message=f"error in eventbridge {exception}", error_code="1001")
+        
+        return response

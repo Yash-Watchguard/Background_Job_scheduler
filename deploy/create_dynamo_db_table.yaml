@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Dynamo db table for the python eval project"
+
+Resources:
+    MyDynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+          BillingMode: PAY_PER_REQUEST
+          TableName: Job_Records
+          
+          AttributeDefinitions:
+            - AttributeName: PK
+              AttributeType: S
+            - AttributeName: SK
+              AttributeType: S
+
+          KeySchema:
+            - AttributeName: PK
+              KeyType: HASH    
+            - AttributeName: SK
+              KeyType: RANGE
+          
+          
+
+      
+
