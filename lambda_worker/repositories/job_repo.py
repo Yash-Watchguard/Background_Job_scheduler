@@ -35,12 +35,12 @@ class JobRepo:
             items = response.get("Items", [])
 
             if not items:
-                raise Exception("error occured")
+                raise Exception("Job not found")
 
             return dynamo_to_model(items[0], JobRecord)
 
         except self.ddb_client.exceptions.ClientError as e:
-            raise Exception("error occured")
+            raise Exception(f"DynamoDB error in get_job: {str(e)}")
         
     
     def post_job_execution(
@@ -60,13 +60,17 @@ class JobRepo:
             'JobId': ?,
             'Status': ?,
             'LogUrl': ?,
+            'StartedAt' :?,
+            'FinishedAt': ?,
+            'RetryCount':?,
+            'MaxRetries':?
         }}
         """
 
         parameters = [
             {"S": f"JOB#{job_id}"},
-            {"S": f"EXECUTION#{execution_model.Execution_id}"},
-            {"S": execution_model.Execution_id},
+            {"S": f"EXECUTION#{execution_model.execution_id}"},
+            {"S": execution_model.execution_id},
             {"S": execution_model.job_id},
             {"S": execution_model.status.value},
             (
@@ -74,7 +78,14 @@ class JobRepo:
                 if execution_model.log_url
                 else {"NULL": True}
             ),
-
+            {"S": execution_model.started_at.isoformat()},
+            (
+                {"S": execution_model.finished_at.isoformat()}
+                if execution_model.finished_at
+                else {"NULL": True}
+            ),
+            {"N": str(execution_model.retry_count)},
+            {"N": str(execution_model.max_retries)}
         ]
 
         try:
@@ -83,7 +94,7 @@ class JobRepo:
                 Parameters=parameters
             )
         except self.ddb_client.exceptions.ClientError as e:
-            raise Exception
+            raise Exception(f"DynamoDB error in post_job_execution: {str(e)}")
 
         return True
     
@@ -92,40 +103,76 @@ class JobRepo:
         job_id: str,
         execution_id: str,
         status: ExecutionStatus,
+        retry_count:int|None=None,
+        finished_at:str|None = None,
         log_url: str | None = None,
     ) -> bool:
+        
+        
+        set_clauses = ["Status = ?"]
+        parameters = [{"S": status.value}]
+
+        if retry_count is not None:
+            set_clauses.append("RetryCount = ?")
+            parameters.append({"N": str(retry_count)})
+
+        if finished_at is not None:
+            set_clauses.append("FinishedAt = ?")
+            parameters.append({"S": finished_at})
+
+        if log_url is not None:
+            set_clauses.append("LogUrl = ?")
+            parameters.append({"S": log_url})
+
+        set_expression = ", ".join(set_clauses)
        
         statement = f"""
-        UPDATE "{self.table_name}"
-        SET
-            #s = ?,
-            LogUrl = ?
-        WHERE
-            pk = ? AND sk = ?
+            UPDATE "{self.table_name}"
+            SET {set_expression}
+            WHERE pk = ? AND sk = ?
         """
-
-        parameters = [
-            {"S": status.value},
-            (
-                {"S": log_url}
-                if log_url
-                else {"NULL": True}
-            ),
+        
+        parameters.extend([
             {"S": f"JOB#{job_id}"},
             {"S": f"EXECUTION#{execution_id}"},
-        ]
+        ])
 
         try:
             self.ddb_client.execute_statement(
                 Statement=statement,
                 Parameters=parameters,
-                ExpressionAttributeNames={
-                    "#s": "Status"
-                }
             )
 
         except self.ddb_client.exceptions.ClientError as e:
-            raise Exception from e
+            raise Exception(f"DynamoDB error in update_job_execution: {str(e)}")
 
         return True
+    
+    def get_job_execution(self,job_id:str,execution_id:str):
         
+        statement = f'''
+        SELECT *
+        FROM "{self.table_name}"
+        WHERE pk = ? AND sk = ?
+        '''
+
+        parameters = [
+            {"S": f"JOB#{job_id}"},
+            {"S": f"EXECUTION#{execution_id}"},
+        ]
+
+        try:
+            response = self.ddb_client.execute_statement(
+                Statement=statement,
+                Parameters=parameters
+            )
+
+            items = response.get("Items", [])
+
+            if not items:
+                return None
+
+            return dynamo_to_model(items[0], ExecutionModel)
+
+        except self.ddb_client.exceptions.ClientError as e:
+            raise Exception(f"DynamoDB error in get_EXECUTION: {str(e)}")

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import io
 
 
@@ -7,7 +7,7 @@ class ExecutionLogger:
         self._buffer = io.StringIO()
 
     def log(self, message: str):
-        timestamp = datetime.now().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
         self._buffer.write(f"[{timestamp}] {message}\n")
 
     def get_logs(self) -> str:

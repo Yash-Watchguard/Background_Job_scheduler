@@ -22,7 +22,7 @@ class JobService:
             print(job_data.schedule_type)
             validate_schedule(job_data.schedule_type, job_data.job_type)
             schedule_expression = get_schedule_expression(job_data.schedule_type, job_data.schedule_value)
-            self.scheduler_service.create_new_schedule(job_id,JOB_QUEUE_ARN,schedule_expression)
+            self.scheduler_service.create_new_schedule(job_id,user_id,JOB_QUEUE_ARN,schedule_expression)
         except Exception:
             raise 
         

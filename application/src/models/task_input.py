@@ -2,7 +2,6 @@ from pydantic import BaseModel,Field, ConfigDict, EmailStr
 
 class TaskInput(BaseModel):
     to:list[EmailStr] = Field(... , min_length=1,alias="To")
-    cc:list[EmailStr] = Field(...,min_length=1, alias="CC")
     sender_email:EmailStr = Field(..., alias="SenderEmail")
     subject:str = Field(... ,alias="Subject")
     content:str = Field(... , alias="Content")

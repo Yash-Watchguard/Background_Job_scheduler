@@ -5,7 +5,7 @@ class LogService:
         self.s3_client = s3
         
         
-    def upload_log(job_id:str, execution_id:str,logs:str):
+    def upload_log(self, job_id:str, execution_id:str,logs:str):
         key = f"job_id={job_id}/execution_id={execution_id}.log"
 
         s3.put_object(

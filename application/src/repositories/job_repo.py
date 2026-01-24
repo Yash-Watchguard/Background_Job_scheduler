@@ -58,9 +58,6 @@ class JobRepo:
             {
                 "M": {
                     "To": {"L": [{"S": email} for email in job_request.task_input.to]},
-                    "CC": {
-                        "L": [{"S": email} for email in job_request.task_input.cc]
-                    } if job_request.task_input.cc else {"NULL": True},
                     "SenderEmail" :{"S": job_request.task_input.sender_email},
                     "Subject": {"S": job_request.task_input.subject},
                     "Content": {"S": job_request.task_input.content},

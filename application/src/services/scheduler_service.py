@@ -9,7 +9,7 @@ class SchedulerService:
         self.group_name = schedule_group_name
         
         
-    def create_new_schedule(self, job_id:str, target_queue_arn:str, schedule_expression:str):
+    def create_new_schedule(self, job_id:str,user_id, target_queue_arn:str, schedule_expression:str):
         
         schedule_name = f"bg-job-{job_id}"
         
@@ -25,7 +25,8 @@ class SchedulerService:
                 "Arn" :target_queue_arn,
                 "RoleArn": self.role_arn,
                 "Input":json.dumps({
-                    "job_id":job_id
+                    "job_id":job_id,
+                    "user_id":user_id
                 })
             }
         )

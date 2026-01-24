@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: BG Job Lambda Worker (Email Scheduler)
+
+Parameters:
+  JobTableName:
+    Type: String
+    Description: DynamoDB Job table name
+
+  LogBucketName:
+    Type: String
+    Description: S3 bucket for execution logs
+
+  QueueArn:
+    Type: String
+    Description: ARN of existing SQS queue
+
+Resources:
+
+  # -------------------------------------------------
+  # Lambda Worker
+  # -------------------------------------------------
+  BgJobWorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bg-job-worker
+      Runtime: python3.10
+      Handler: handler.handler
+      CodeUri: ../lambda_worker
+      Timeout: 300
+      MemorySize: 512
+
+      Events:
+        SQSTrigger:
+          Type: SQS
+          Properties:
+            Queue: !Ref QueueArn
+            BatchSize: 10
+            Enabled: true
+
+      Policies:
+        # CloudWatch Logs
+        - AWSLambdaBasicExecutionRole
+
+        # DynamoDB access
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:ExecuteStatement
+              Resource:
+                - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${JobTableName}
+
+        # SQS consume
+        - Statement:
+            - Effect: Allow
+              Action:
+                - sqs:ReceiveMessage
+                - sqs:DeleteMessage
+                - sqs:GetQueueAttributes
+              Resource: !Ref QueueArn
+
+        # S3 log upload
+        - Statement:
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource: !Sub arn:aws:s3:::${LogBucketName}/*
+
+        # SES send email
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: "*"
+
+Outputs:
+  WorkerLambdaArn:
+    Description: BG Job Worker Lambda ARN
+    Value: !GetAtt BgJobWorkerFunction.Arn
