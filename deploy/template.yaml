@@ -14,12 +14,13 @@ Parameters:
   QueueArn:
     Type: String
     Description: ARN of existing SQS queue
+  
+  DlqArn:
+    Type: String
+    Description: ARN of DLQ SQS queue
 
 Resources:
 
-  # -------------------------------------------------
-  # Lambda Worker
-  # -------------------------------------------------
   BgJobWorkerFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -39,10 +40,8 @@ Resources:
             Enabled: true
 
       Policies:
-        # CloudWatch Logs
         - AWSLambdaBasicExecutionRole
 
-        # DynamoDB access
         - Statement:
             - Effect: Allow
               Action:
@@ -53,7 +52,6 @@ Resources:
               Resource:
                 - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${JobTableName}
 
-        # SQS consume
         - Statement:
             - Effect: Allow
               Action:
@@ -62,20 +60,47 @@ Resources:
                 - sqs:GetQueueAttributes
               Resource: !Ref QueueArn
 
-        # S3 log upload
         - Statement:
             - Effect: Allow
               Action:
                 - s3:PutObject
               Resource: !Sub arn:aws:s3:::${LogBucketName}/*
 
-        # SES send email
         - Statement:
             - Effect: Allow
               Action:
                 - ses:SendEmail
                 - ses:SendRawEmail
               Resource: "*"
+
+  BgJobDlqHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bg-job-dlq-handler
+      Runtime: python3.10
+      Handler: handler.handler
+      CodeUri: ../lambda_dlq_handler
+      Timeout: 30
+      MemorySize: 256
+
+      Events:
+        DlqSQSTrigger:
+          Type: SQS
+          Properties:
+            Queue: !Ref DlqArn
+            BatchSize: 10
+            Enabled: true
+
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:UpdateItem
+                - dynamodb:ExecuteStatement
+              Resource:
+                - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${JobTableName}
 
 Outputs:
   WorkerLambdaArn:

@@ -35,3 +35,90 @@ class SchedulerService:
             raise AppException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,message=f"error in eventbridge {exception}", error_code="1001")
         
         return response
+    
+    
+    def delete_scheduler(self, job_id:str):
+        
+        schedule_name = f"bg-job-{job_id}"
+        
+        try:
+            self.scheduler_client.delete_schedule(
+                Name=schedule_name,
+                GroupName=self.group_name,
+            )
+            
+        except self.scheduler_client.exceptions.ResourceNotFoundException:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Schedule not found",
+                error_code=1001
+            )
+        except Exception as exception:
+            raise AppException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f"error in delete the schedule{exception} ", error_code=1001) from exception
+    
+    def get_schedule_details(self, job_id:str):
+        schedule_name = f"bg-job-{job_id}"
+        
+        try:
+            response = self.scheduler_client.get_schedule(
+                Name=schedule_name,
+                GroupName=self.group_name,
+            )
+            return {
+                "schedule_expression": response.get("ScheduleExpression"),
+                "target": response.get("Target")
+            }
+        except self.scheduler_client.exceptions.ResourceNotFoundException:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Schedule not found",
+                error_code=1001
+            )
+        except Exception as exception:
+            raise AppException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f"error in fetching the schedule{exception} ", error_code=1001) from exception
+        
+    def deacivate_scheduler(self, job_id:str):
+        schedule_name = f"bg-job-{job_id}"
+        
+        try:
+            schedule_details = self.get_schedule_details(job_id)
+            self.scheduler_client.update_schedule(
+                Name=schedule_name,
+                GroupName=self.group_name,
+                State="DISABLED",
+                ScheduleExpression=schedule_details["schedule_expression"],
+                Target=schedule_details["target"],
+                FlexibleTimeWindow={"Mode": "OFF"},
+            )
+        except self.scheduler_client.exceptions.ResourceNotFoundException:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Schedule not found",
+                error_code=1001
+            )
+        except Exception as exception:
+            raise AppException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f"error in updating the schedule{exception} ", error_code=1001) from exception
+    
+    def activate_scheduler(self, job_id:str):
+        schedule_name = f"bg-job-{job_id}"
+        
+        try:
+            schedule_details = self.get_schedule_details(job_id)
+            self.scheduler_client.update_schedule(
+                Name=schedule_name,
+                GroupName=self.group_name,
+                State="ENABLED",
+                ScheduleExpression=schedule_details["schedule_expression"],
+                Target=schedule_details["target"],
+                FlexibleTimeWindow={"Mode": "OFF"},
+            )    
+        except self.scheduler_client.exceptions.ResourceNotFoundException:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Schedule not found",
+                error_code=1001
+            )
+            
+        except Exception as exception:
+            raise AppException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f"error in updating the schedule{exception} ", error_code=1001) from exception
+       

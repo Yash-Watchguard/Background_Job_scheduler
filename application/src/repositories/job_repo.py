@@ -5,12 +5,18 @@ from mypy_boto3_dynamodb import DynamoDBClient
 
 from errors.app_exception import AppException
 from constants.custom_error_code_registry import (
-    Db_Error,
+    Db_Error
 )
-from constants import error_messages
+
+from models.job_execution_model import ExecutionModel
+from typing import List
+from constants.error_messages import JOB_EXECUTIONS_FETCH_ERROR, JOB_CREATION_ERROR
 from helper.serializer_deserializer import dynamo_to_model
 from schemas.job import JobReqest
 from datetime import datetime
+from enums.job_status import JobStatus
+from models.job_model import JobRecord
+from helper.serializer_deserializer import dynamo_to_model
 
 
 class JobRepo:
@@ -43,7 +49,9 @@ class JobRepo:
             'ScheduleValue': ?,
             'TaskType': ?,
             'TaskInput':?,
-            'CreatedAt': ?
+            'CreatedAt': ?,
+            'Status' :?,
+            'CreatedBy':?
         }}
         """
 
@@ -64,6 +72,8 @@ class JobRepo:
                 }
             },
             {"S": datetime.now().isoformat()},
+            {"S": JobStatus.ACTIVE.value},
+            {"S": user_id}
         ]
 
         try:
@@ -76,8 +86,87 @@ class JobRepo:
             raise AppException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 error_code=Db_Error,
-                message=f"error from the db to store the url{str(e)}"
+                message=f"{JOB_CREATION_ERROR} {str(e)}"
             )
 
 
         return True
+    
+    def get_job(self, user_id:str ,job_id:str)->JobRecord:
+        statement =  f'''
+            SELECT * FROM "{self.table_name}" WHERE pk = ? AND sk = ?
+        '''
+        try:
+            response = self.dynamo_db.execute_statement(
+                Statement=statement,
+                Parameters=[
+                    {"S":f"USER#{user_id}"},
+                    {"S": f"JOBS#{job_id}"}
+                ]
+            )
+            
+            items = response["Items"]
+            
+            if not items :
+                raise AppException(status_code=status.HTTP_404_NOT_FOUND, message="job with job id is not present", error_code=1001)
+            
+            job:JobRecord = dynamo_to_model(items[0],JobRecord)
+            
+            return job
+            
+        except self.dynamo_db.exceptions.ClientError as e :
+            raise AppException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f"{e}", error_code=1001)
+            
+            
+    def get_job_executions(self,job_id:str) -> List[ExecutionModel]:
+        statement = f'''
+        SELECT * FROM "{self.table_name}" WHERE pk = ? AND begins_with(sk , ?)
+        
+        '''
+        
+        try:
+            response = self.dynamo_db.execute_statement(
+                Statement=statement,
+                Parameters=[
+                    {"S" : f"JOB#{job_id}"},
+                    {"S" :"EXECUTION#"}
+                ]
+            )
+            
+            items = response["Items"]
+
+            if not items:
+                return []
+            
+            executions = [dynamo_to_model(item, ExecutionModel) for item in items]
+            
+            return executions
+        
+        except self.dynamo_db.exceptions.ClientError as e:
+            raise AppException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                error_code=Db_Error,
+                message=f"{JOB_EXECUTIONS_FETCH_ERROR} {str(e)}"
+            )
+            
+            
+    def update_job_status(self, user_id:str , job_id :str , job_status:str):
+        statement = f'''
+         UPDATE "{self.table_name}" SET Status = ? WHERE pk = ? AND sk = ?
+        '''
+        try:
+            self.dynamo_db.execute_statement(
+                Statement=statement,
+                Parameters=[
+                    {"S" :job_status},
+                    {"S" :f"USER#{user_id}"},
+                    {"S": f"JOBS#{job_id}"}
+                ],
+            )
+            
+        except self.dynamo_db.exceptions.ClientError as e:
+            raise AppException(status_code= status.HTTP_500_INTERNAL_SERVER_ERROR,message=f"{e}", error_code=Db_Error)
+            
+            
+
+        

@@ -5,7 +5,6 @@ from fastapi import Depends
 from repositories.job_repo import JobRepo
 
 from core.aws_clients import  eventbridge_scheduler_client
-from services.s3_service import S3Service
 from services.job_service import JobService
 from core.config import SCHEDULE_GROUP_NAME, SCHEDULER_ROLE_ARN
 from services.scheduler_service import SchedulerService

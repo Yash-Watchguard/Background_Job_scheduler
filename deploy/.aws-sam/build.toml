@@ -9,4 +9,13 @@ manifest_hash = ""
 packagetype = "Zip"
 functions = ["BgJobWorkerFunction"]
 
+[function_build_definitions.af501934-6506-4084-9da2-d8f82002d2e2]
+codeuri = "C:\\Users\\ygoyal\\OneDrive - WatchGuard Technologies Inc\\Desktop\\BG_SCHEDULER\\BG_JOB_SCHEDULER_SYSTEM\\lambda_dlq_handler"
+runtime = "python3.10"
+architecture = "x86_64"
+handler = "handler.handler"
+manifest_hash = ""
+packagetype = "Zip"
+functions = ["BgJobDlqHandlerFunction"]
+
 [layer_build_definitions]

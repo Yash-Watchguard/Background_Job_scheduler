@@ -12,7 +12,7 @@ from models.user_model import User
 auth_router = APIRouter()
 
 @auth_router.post("/v1/auth/login")
-def login(
+async def login(
     request: LoginRequest,
     auth_service: AuthService = Depends(get_auth_service),
 ):

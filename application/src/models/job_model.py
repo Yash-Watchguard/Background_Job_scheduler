@@ -6,6 +6,7 @@ from enums.job_type import JobType
 from enums.schedule_type import ScheduleType
 from enums.task_type import TaskType
 from models.task_input import TaskInput
+from enums.job_status import JobStatus
 
 
 class JobRecord(BaseModel):
@@ -16,6 +17,8 @@ class JobRecord(BaseModel):
     task_type:TaskType = Field(alias="TaskType")
     task_input:TaskInput = Field(alias="TaskInput")
     created_at: datetime = Field(alias="CreatedAt")
+    status:JobStatus = Field(default=JobStatus.ACTIVE)
+    created_by:str = Field(alias="CreatedBy")
     model_config = ConfigDict(
         str_strip_whitespace=True,
         populate_by_name=True
