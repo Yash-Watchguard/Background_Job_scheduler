@@ -1,5 +1,5 @@
 import jwt,time, os
-from jwt import PyJWTError
+from jwt.exceptions import PyJWTError
 
 from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
 
@@ -7,6 +7,7 @@ from models.jwt_payload import JwtPayload
 from errors.app_exception import AppException
 from errors.error_registry import ErrorCode
 from fastapi import Depends
+from core.config import algo, secret_key, expiry_time
 
 
 
@@ -14,9 +15,7 @@ security = HTTPBearer()
 
 def create_jwt_token(user_id: str) -> str:
     
-    secret_key: str = os.getenv("JWT_SECRET_KEY","yashgoyal123").encode('utf-8')
-    algo: str = os.getenv("JWT_ALGORITHM")
-    expiry_time: int = int(os.getenv("JWT_EXPIRY_TIME"))
+   
     payload = JwtPayload(
         authorized= "true",       
         user_id= user_id,          

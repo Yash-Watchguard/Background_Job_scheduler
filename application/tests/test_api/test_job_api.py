@@ -10,9 +10,6 @@ from constants.success_message import SuccessMessage
 
 class TestJobAPI:
 
-    # -------------------------------------------------
-    # CREATE JOB — SUCCESS
-    # -------------------------------------------------
     def test_create_job_success(self, test_client, mock_job_service):
         mock_job_service.create_job.return_value = None
 
@@ -39,17 +36,13 @@ class TestJobAPI:
 
         mock_job_service.create_job.assert_called_once()
 
-    # -------------------------------------------------
-    # CREATE JOB — VALIDATION ERROR
-    # -------------------------------------------------
+
     def test_create_job_validation_error(self, test_client):
         response = test_client.post("/v1/job", json={})
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
-    # -------------------------------------------------
-    # CREATE JOB — SERVICE ERROR
-    # -------------------------------------------------
+  
     def test_create_job_service_error(self, test_client, mock_job_service):
         mock_job_service.create_job.side_effect = AppException(
             error_code=ErrorCode.JOB_CREATION_FAILED
@@ -72,9 +65,7 @@ class TestJobAPI:
 
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
-    # -------------------------------------------------
-    # GET JOB — SUCCESS
-    # -------------------------------------------------
+
     def test_get_job_success(self, test_client, mock_job_service):
         mock_job_service.get_scheduled_job.return_value = {
             "job_id": "job-123",
@@ -86,9 +77,7 @@ class TestJobAPI:
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["data"]["job_id"] == "job-123"
 
-    # -------------------------------------------------
-    # GET JOB — NOT FOUND
-    # -------------------------------------------------
+
     def test_get_job_not_found(self, test_client, mock_job_service):
         mock_job_service.get_scheduled_job.side_effect = AppException(
             error_code=ErrorCode.JOB_NOT_FOUND
@@ -98,17 +87,15 @@ class TestJobAPI:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    # -------------------------------------------------
-    # GET JOB EXECUTIONS — SUCCESS
-    # -------------------------------------------------
+
     def test_get_job_executions_success(self, test_client, mock_job_service):
         execution = MagicMock()
         execution.execution_id = "exec-1"
         execution.status.value = "SUCCESS"
         execution.retry_count = 1
         execution.log_url = "http://log"
-        execution.started_at = datetime.utcnow()
-        execution.finished_at = datetime.utcnow()
+        execution.started_at = datetime.now()
+        execution.finished_at = datetime.now()
 
         mock_job_service.get_job_executions.return_value = [execution]
 
@@ -121,9 +108,8 @@ class TestJobAPI:
         assert len(body["data"]) == 1
         assert body["data"][0]["execution_id"] == "exec-1"
 
-    # -------------------------------------------------
-    # GET JOB EXECUTIONS — SERVICE ERROR
-    # -------------------------------------------------
+  
+  
     def test_get_job_executions_error(self, test_client, mock_job_service):
         mock_job_service.get_job_executions.side_effect = AppException(
             error_code=ErrorCode.FAILED_TO_FETCH_JOB_EXECUTIONS
@@ -133,18 +119,15 @@ class TestJobAPI:
 
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
-    # -------------------------------------------------
-    # DELETE JOB — SUCCESS
-    # -------------------------------------------------
+
     def test_delete_job_success(self, test_client, mock_job_service):
         response = test_client.delete("/v1/job/job-123")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["message"] == "job deleted successfully"
 
-    # -------------------------------------------------
-    # DELETE JOB — FAILURE
-    # -------------------------------------------------
+
+
     def test_delete_job_failure(self, test_client, mock_job_service):
         mock_job_service.delete_job.side_effect = AppException(
             error_code=ErrorCode.JOB_DELETION_FAILED
@@ -154,18 +137,16 @@ class TestJobAPI:
 
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
-    # -------------------------------------------------
-    # DEACTIVATE JOB — SUCCESS
-    # -------------------------------------------------
+
+
     def test_deactivate_job_success(self, test_client):
         response = test_client.patch("/v1/job/job-123/deactivate")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["message"] == "job terminated successfully"
 
-    # -------------------------------------------------
-    # ACTIVATE JOB — SUCCESS
-    # -------------------------------------------------
+   
+   
     def test_activate_job_success(self, test_client):
         response = test_client.patch("/v1/job/job-123/activate")
 

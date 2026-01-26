@@ -8,9 +8,7 @@ from errors.app_exception import AppException
 from errors.error_registry import ErrorCode
 
 
-# =====================================================
-# LOGIN TESTS
-# =====================================================
+
 
 @patch("services.auth_service.create_jwt_token", return_value="fake-jwt")
 @patch("services.auth_service.check_password", return_value=True)
@@ -64,9 +62,7 @@ def test_login_invalid_password(
     assert exc.value.error_code == ErrorCode.INVALID_CREDENTIAL
 
 
-# =====================================================
-# SIGNUP TESTS
-# =====================================================
+
 
 def test_signup_user_already_exists(mock_user_repo):
     mock_user_repo.get_user_by_email.return_value = User(

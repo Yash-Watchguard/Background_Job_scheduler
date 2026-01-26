@@ -7,7 +7,7 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: bg-job-dlq
-      MessageRetentionPeriod: 1209600   # 14 days
+      MessageRetentionPeriod: 1209600  
 
       Tags:
         - Key: Project

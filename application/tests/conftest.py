@@ -36,9 +36,7 @@ def mock_user_repo():
 
 @pytest.fixture
 def mock_auth_service():
-    """
-    AuthService is synchronous → MagicMock
-    """
+  
     return MagicMock()
 
 @pytest.fixture
@@ -55,15 +53,13 @@ def mock_jwt_payload():
 def test_client(mock_auth_service, mock_job_service,mock_jwt_payload):
     app = FastAPI()
 
-    # ✅ Register global exception handlers
     register_exception_handler(app)
 
-    # ✅ Override dependency
     app.dependency_overrides[get_auth_service] = lambda: mock_auth_service
     app.dependency_overrides[get_job_service] = lambda: mock_job_service
     app.dependency_overrides[varify_jwt] = lambda: mock_jwt_payload
 
-    # ✅ Include router
+
     app.include_router(auth_router)
     app.include_router(job_router)
     

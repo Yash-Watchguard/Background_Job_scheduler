@@ -82,6 +82,7 @@ def handler(event, context):
                 retry_count=None,
                 finished_at=datetime.now(timezone.utc).isoformat()
             )
+            
         except Exception as e:
             execution_logger.log(f"Job failed: {str(e)}")
             log_url = log_service.upload_log(

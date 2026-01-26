@@ -89,7 +89,7 @@ Resources:
                   - scheduler:ListSchedules
                 Resource: "*"
 
-              # Required for Scheduler Target
+              
               - Effect: Allow
                 Action:
                   - iam:PassRole
@@ -110,6 +110,7 @@ Resources:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
 
+
   ServiceSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -124,9 +125,7 @@ Resources:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
 
-  ############################
-  # ALB
-  ############################
+
 
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
