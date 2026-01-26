@@ -1,13 +1,12 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status, Depends
 
 from services.auth_service import AuthService
 from schemas.user import LoginRequest,SignupRequest
-from fastapi import APIRouter, Depends
-from http import HTTPStatus
 from response.response import Response
 from services.auth_service import AuthService
 from dpendencies.auth_dependecy import get_auth_service
 from models.user_model import User
+from constants.success_message import SuccessMessage
 
 auth_router = APIRouter()
 
@@ -20,8 +19,8 @@ async def login(
     login_response = auth_service.login(request.email, request.password)
     return Response.success_response(
         data=login_response,
-        message="Token generated Successfully",
-        status_code=HTTPStatus.CREATED.value,
+        message=SuccessMessage.LOGIN,
+        status_code=status.HTTP_201_CREATED,
     )
 
 
@@ -35,6 +34,6 @@ async def signup(
 
     return Response.success_response(
         data=response,
-        status_code=HTTPStatus.CREATED,
-        message="user signup successfully",
+        status_code=status.HTTP_201_CREATED,
+        message=SuccessMessage.SIGNUP,
     )

@@ -1,6 +1,7 @@
 import json
 from errors.app_exception import AppException
-from fastapi import status
+
+from errors.error_registry import ErrorCode
 
 class SchedulerService:
     def __init__(self, scheduler_client, event_bridge_role_arn:str,schedule_group_name:str ):
@@ -32,7 +33,7 @@ class SchedulerService:
         )
         
         except Exception as exception:
-            raise AppException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,message=f"error in eventbridge {exception}", error_code="1001")
+            raise AppException( error_code=ErrorCode.JOB_CREATION_FAILED, detail=str(exception)) from exception
         
         return response
     
@@ -47,16 +48,16 @@ class SchedulerService:
                 GroupName=self.group_name,
             )
             
-        except self.scheduler_client.exceptions.ResourceNotFoundException:
+        except self.scheduler_client.exceptions.ResourceNotFoundException as exception:
             raise AppException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                message="Schedule not found",
-                error_code=1001
+                error_code=ErrorCode.SCHEDULE_NOT_FOUND,
+                detail=str(exception)
             )
         except Exception as exception:
-            raise AppException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f"error in delete the schedule{exception} ", error_code=1001) from exception
+            raise AppException(error_code=ErrorCode.JOB_DELETION_FAILED , detail=str(exception)) from exception
+        
     
-    def get_schedule_details(self, job_id:str):
+    def get_scheduler_details(self, job_id:str):
         schedule_name = f"bg-job-{job_id}"
         
         try:
@@ -68,20 +69,19 @@ class SchedulerService:
                 "schedule_expression": response.get("ScheduleExpression"),
                 "target": response.get("Target")
             }
-        except self.scheduler_client.exceptions.ResourceNotFoundException:
+        except self.scheduler_client.exceptions.ResourceNotFoundException as exception:
             raise AppException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                message="Schedule not found",
-                error_code=1001
+                error_code=ErrorCode.SCHEDULE_NOT_FOUND,
+                detail=str(exception)
             )
         except Exception as exception:
-            raise AppException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f"error in fetching the schedule{exception} ", error_code=1001) from exception
+            raise AppException(error_code=ErrorCode.INTERNAL_SERVER_ERROR,detail=str(exception)) from exception
         
     def deacivate_scheduler(self, job_id:str):
         schedule_name = f"bg-job-{job_id}"
         
         try:
-            schedule_details = self.get_schedule_details(job_id)
+            schedule_details = self.get_scheduler_details(job_id)
             self.scheduler_client.update_schedule(
                 Name=schedule_name,
                 GroupName=self.group_name,
@@ -90,20 +90,19 @@ class SchedulerService:
                 Target=schedule_details["target"],
                 FlexibleTimeWindow={"Mode": "OFF"},
             )
-        except self.scheduler_client.exceptions.ResourceNotFoundException:
+        except self.scheduler_client.exceptions.ResourceNotFoundException as exception:
             raise AppException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                message="Schedule not found",
-                error_code=1001
+                error_code= ErrorCode.JOB_NOT_FOUND,
+                detail=str(exception)
             )
         except Exception as exception:
-            raise AppException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f"error in updating the schedule{exception} ", error_code=1001) from exception
+            raise AppException(error_code=ErrorCode.INTERNAL_SERVER_ERROR , detail=str(exception)) from exception
     
     def activate_scheduler(self, job_id:str):
         schedule_name = f"bg-job-{job_id}"
         
         try:
-            schedule_details = self.get_schedule_details(job_id)
+            schedule_details = self.get_scheduler_details(job_id)
             self.scheduler_client.update_schedule(
                 Name=schedule_name,
                 GroupName=self.group_name,
@@ -111,14 +110,14 @@ class SchedulerService:
                 ScheduleExpression=schedule_details["schedule_expression"],
                 Target=schedule_details["target"],
                 FlexibleTimeWindow={"Mode": "OFF"},
-            )    
-        except self.scheduler_client.exceptions.ResourceNotFoundException:
+            )
+                
+        except self.scheduler_client.exceptions.ResourceNotFoundException as exception:
             raise AppException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                message="Schedule not found",
-                error_code=1001
+                error_code=ErrorCode.JOB_NOT_FOUND,
+                detail=str(exception)
             )
             
         except Exception as exception:
-            raise AppException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f"error in updating the schedule{exception} ", error_code=1001) from exception
+            raise AppException(error_code=ErrorCode.INTERNAL_SERVER_ERROR, detail=str(exception)) from exception
        

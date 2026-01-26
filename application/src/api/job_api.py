@@ -1,25 +1,26 @@
-from fastapi import APIRouter , UploadFile , File , Form, Depends, status
+from fastapi import APIRouter ,Depends, status
+
 from schemas.job import JobReqest
-import json
 from dpendencies.job_dependency import get_job_service
 from services.job_service import JobService
-from errors.app_exception  import AppException
 from response.response import Response
 from helper.jwt import varify_jwt
 from models.jwt_payload import JwtPayload
 from schemas.job_execution_dto import ExecutionDto
+from constants.success_message import SuccessMessage
 
 job_router = APIRouter()
 
 
 @job_router.post('/v1/job')
 async def create_job(job_data:JobReqest,job_service:JobService = Depends(get_job_service), jwt_payload:JwtPayload = Depends(varify_jwt) ):
-    # first validate the request
+    
     user_id = jwt_payload.user_id
     
     job_service.create_job(job_data, user_id)
     
-    return Response.success_response(status_code=status.HTTP_201_CREATED, message="bg job scheduled successfully", data=None)
+    return Response.success_response(status_code=status.HTTP_201_CREATED, message=SuccessMessage.JOB_CREATION)
+
 
 @job_router.get('/v1/job/{job_id}')
 async def get_job(job_id:str,jwt_payload:JwtPayload= Depends(varify_jwt), job_service:JobService = Depends(get_job_service)):
@@ -31,7 +32,6 @@ async def get_job(job_id:str,jwt_payload:JwtPayload= Depends(varify_jwt), job_se
 
 @job_router.get('/v1/jobs/{job_id}/executions')
 async def get_all_job_executions(job_id:str,jwt_payload:JwtPayload= Depends(varify_jwt), job_service:JobService = Depends(get_job_service)):
-    user_id = jwt_payload.user_id
     
     job_executions = job_service.get_job_executions(job_id)
     
@@ -48,7 +48,7 @@ async def get_all_job_executions(job_id:str,jwt_payload:JwtPayload= Depends(vari
         )
         result.append(execution_dto)
         
-    return Response.success_response(data=result,message="executions fetched successfully", status_code=status.HTTP_200_OK)
+    return Response.success_response(data=result,message=SuccessMessage.JOB_EXECUTIONS_FETCH, status_code=status.HTTP_200_OK)
 
 @job_router.delete('/v1/job/{job_id}')
 async def delete_job(job_id:str, jwt_payload:JwtPayload = Depends(varify_jwt), job_service:JobService=Depends(get_job_service)):

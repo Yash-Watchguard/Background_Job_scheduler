@@ -4,19 +4,18 @@ from fastapi import status
 from mypy_boto3_dynamodb import DynamoDBClient
 
 from errors.app_exception import AppException
-from constants.custom_error_code_registry import (
-    Db_Error
-)
+
 
 from models.job_execution_model import ExecutionModel
 from typing import List
-from constants.error_messages import JOB_EXECUTIONS_FETCH_ERROR, JOB_CREATION_ERROR
+
 from helper.serializer_deserializer import dynamo_to_model
 from schemas.job import JobReqest
 from datetime import datetime
 from enums.job_status import JobStatus
 from models.job_model import JobRecord
 from helper.serializer_deserializer import dynamo_to_model
+from errors.error_registry import ErrorCode
 
 
 class JobRepo:
@@ -82,12 +81,11 @@ class JobRepo:
                 Parameters=parameters
             )
 
-        except self.dynamo_db.exceptions.ClientError as e:
+        except self.dynamo_db.exceptions.ClientError as exception:
             raise AppException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                error_code=Db_Error,
-                message=f"{JOB_CREATION_ERROR} {str(e)}"
-            )
+                error_code=ErrorCode.JOB_CREATION_FAILED,
+                detail=str(exception)
+            ) from exception
 
 
         return True
@@ -108,14 +106,14 @@ class JobRepo:
             items = response["Items"]
             
             if not items :
-                raise AppException(status_code=status.HTTP_404_NOT_FOUND, message="job with job id is not present", error_code=1001)
+                raise AppException(error_code=ErrorCode.JOB_NOT_FOUND)
             
             job:JobRecord = dynamo_to_model(items[0],JobRecord)
             
             return job
             
-        except self.dynamo_db.exceptions.ClientError as e :
-            raise AppException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=f"{e}", error_code=1001)
+        except self.dynamo_db.exceptions.ClientError as exception :
+            raise AppException(error_code=ErrorCode.DB_ERROR, detail=str(exception)) from exception
             
             
     def get_job_executions(self,job_id:str) -> List[ExecutionModel]:
@@ -142,12 +140,11 @@ class JobRepo:
             
             return executions
         
-        except self.dynamo_db.exceptions.ClientError as e:
+        except self.dynamo_db.exceptions.ClientError as exception:
             raise AppException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                error_code=Db_Error,
-                message=f"{JOB_EXECUTIONS_FETCH_ERROR} {str(e)}"
-            )
+                error_code=ErrorCode.FAILED_TO_FETCH_JOB_EXECUTIONS,
+                detail=str(exception)
+            ) from exception
             
             
     def update_job_status(self, user_id:str , job_id :str , job_status:str):
@@ -164,8 +161,8 @@ class JobRepo:
                 ],
             )
             
-        except self.dynamo_db.exceptions.ClientError as e:
-            raise AppException(status_code= status.HTTP_500_INTERNAL_SERVER_ERROR,message=f"{e}", error_code=Db_Error)
+        except self.dynamo_db.exceptions.ClientError as exception:
+            raise AppException(error_code=ErrorCode.JOB_UPDATE_FAILED, detail=str(exception)) from exception
             
             
 

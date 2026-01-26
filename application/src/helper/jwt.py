@@ -1,14 +1,12 @@
-import jwt
-import time
-
-import os
-from models.jwt_payload import JwtPayload
-
-from fastapi import Depends,status
-from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
+import jwt,time, os
 from jwt import PyJWTError
+
+from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
+
+from models.jwt_payload import JwtPayload
 from errors.app_exception import AppException
-from constants import custom_error_code_registry
+from errors.error_registry import ErrorCode
+from fastapi import Depends
 
 
 
@@ -42,4 +40,4 @@ def varify_jwt(credentials : HTTPAuthorizationCredentials= Depends(security))->J
         return JwtPayload(**payload)
         
     except PyJWTError as exception:
-        raise AppException(status_code=status.HTTP_401_UNAUTHORIZED, message="user is not authorized or invalid token" , error_code=custom_error_code_registry.Unauthorized_Error) from exception
+        raise AppException(error_code=ErrorCode.INVALID_TOKEN) from exception

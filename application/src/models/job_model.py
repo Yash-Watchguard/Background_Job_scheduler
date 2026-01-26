@@ -17,7 +17,7 @@ class JobRecord(BaseModel):
     task_type:TaskType = Field(alias="TaskType")
     task_input:TaskInput = Field(alias="TaskInput")
     created_at: datetime = Field(alias="CreatedAt")
-    status:JobStatus = Field(default=JobStatus.ACTIVE)
+    status:JobStatus = Field(default=JobStatus.ACTIVE, alias="Status")
     created_by:str = Field(alias="CreatedBy")
     model_config = ConfigDict(
         str_strip_whitespace=True,

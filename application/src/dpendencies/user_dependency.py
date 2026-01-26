@@ -1,13 +1,14 @@
 from repositories.user_repo import UserRepo
 import os
 
-from db.connection import get_db,TABLE_NAME
+from core.aws_clients import get_db
+from core.config import TABLE_NAME
 from repositories.user_repo import UserRepo
 
 from fastapi import Depends
 
 
-from services.user_service import UserService
+
 from mypy_boto3_dynamodb import DynamoDBClient
 import os
 
@@ -17,8 +18,6 @@ def get_user_repo(dynamo_client:DynamoDBClient = Depends(get_db))->UserRepo:
         table_name=TABLE_NAME
     )
     
-def get_user_service(user_repo:UserRepo = Depends(get_user_repo))->UserService:
-    return UserService(user_repo)
 
 
 
