@@ -7,10 +7,6 @@ from errors.app_exception import AppException
 from errors.error_registry import ErrorCode
 
 
-# ======================================================
-# FIXTURES
-# ======================================================
-
 @pytest.fixture
 def mock_dynamo_db():
     dynamo = MagicMock()
@@ -47,10 +43,6 @@ def user_model():
     )
 
 
-# ======================================================
-# get_user_by_email
-# ======================================================
-
 def test_get_user_by_email_success(user_repo, mock_dynamo_db, user_model):
     mock_dynamo_db.execute_statement.return_value = {
         "Items": [
@@ -63,8 +55,7 @@ def test_get_user_by_email_success(user_repo, mock_dynamo_db, user_model):
             }
         ]
     }
-
-    # Patch serializer
+    
     from helper.serializer_deserializer import dynamo_to_model
     original = dynamo_to_model
 
@@ -79,7 +70,6 @@ def test_get_user_by_email_success(user_repo, mock_dynamo_db, user_model):
     assert user.email == "test@gmail.com"
     assert user.id == "user-123"
 
-    # Restore original
     helper.serializer_deserializer.dynamo_to_model = original
 
 
@@ -103,9 +93,6 @@ def test_get_user_by_email_db_error(user_repo, mock_dynamo_db):
     assert exc.value.error_code == ErrorCode.DB_ERROR
 
 
-# ======================================================
-# save_user
-# ======================================================
 
 def test_save_user_success(user_repo, mock_dynamo_db, user_model):
     mock_dynamo_db.execute_statement.return_value = None

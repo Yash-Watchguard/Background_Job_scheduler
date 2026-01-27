@@ -37,12 +37,11 @@ def handler(event, context):
             f"Processing job_id={job_id}, execution_id={execution_id}, attempt={receive_count}"
         )
 
-        # _=job_service.post_job_execution(job_id)
 
         job_execution = job_service.get_job_execution(job_id, execution_id)
 
         if not job_execution:
-            _ = job_service.post_job_execution(job_id, execution_id)
+            job_service.post_job_execution(job_id, execution_id)
             execution_logger.log("Job execution created")
 
         else:

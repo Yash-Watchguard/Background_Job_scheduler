@@ -6,9 +6,7 @@ from errors.app_exception import AppException
 from errors.error_registry import ErrorCode
 
 
-# ======================================================
-# FIXTURES
-# ======================================================
+
 
 @pytest.fixture
 def mock_dynamo_db():
@@ -47,9 +45,6 @@ def fake_job_request():
     return job_req
 
 
-# ======================================================
-# put_new_job
-# ======================================================
 
 def test_put_new_job_success(job_repo, mock_dynamo_db, fake_job_request):
     mock_dynamo_db.execute_statement.return_value = None
@@ -79,9 +74,6 @@ def test_put_new_job_client_error(job_repo, mock_dynamo_db, fake_job_request):
     assert exc.value.error_code == ErrorCode.JOB_CREATION_FAILED
 
 
-# ======================================================
-# get_job
-# ======================================================
 
 from unittest.mock import patch, MagicMock
 
@@ -120,10 +112,6 @@ def test_get_job_db_error(job_repo, mock_dynamo_db):
 
     assert exc.value.error_code == ErrorCode.DB_ERROR
 
-
-# ======================================================
-# get_job_executions
-# ======================================================
 
 from unittest.mock import patch, MagicMock
 
@@ -165,10 +153,6 @@ def test_get_job_executions_db_error(job_repo, mock_dynamo_db):
 
     assert exc.value.error_code == ErrorCode.FAILED_TO_FETCH_JOB_EXECUTIONS
 
-
-# ======================================================
-# update_job_status
-# ======================================================
 
 def test_update_job_status_success(job_repo, mock_dynamo_db):
     job_repo.update_job_status("user-1", "job-1", "ACTIVE")

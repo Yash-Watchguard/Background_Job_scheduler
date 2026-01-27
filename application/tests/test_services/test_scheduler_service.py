@@ -7,15 +7,12 @@ from errors.app_exception import AppException
 from errors.error_registry import ErrorCode
 
 
-# =========================================================
-# FIXTURES
-# =========================================================
+
 
 @pytest.fixture
 def mock_scheduler_client():
     client = MagicMock()
 
-    # simulate boto3-style exception namespace
     class ResourceNotFoundException(Exception):
         pass
 
@@ -32,10 +29,6 @@ def scheduler_service(mock_scheduler_client):
     )
 
 
-# =========================================================
-# CREATE NEW SCHEDULE
-# =========================================================
-
 def test_create_new_schedule_success(scheduler_service, mock_scheduler_client):
     mock_scheduler_client.create_schedule.return_value = {"status": "ok"}
 
@@ -43,13 +36,13 @@ def test_create_new_schedule_success(scheduler_service, mock_scheduler_client):
         job_id="job-1",
         user_id="user-1",
         target_queue_arn="arn:aws:sqs:test",
-        schedule_expression="rate(5 minutes)"
+        schedule_expression="cron(5 minutes)"
     )
 
     assert response == {"status": "ok"}
     mock_scheduler_client.create_schedule.assert_called_once()
 
-    # verify input payload
+    
     args, kwargs = mock_scheduler_client.create_schedule.call_args
     payload = json.loads(kwargs["Target"]["Input"])
     assert payload["job_id"] == "job-1"
@@ -67,9 +60,6 @@ def test_create_new_schedule_failure(scheduler_service, mock_scheduler_client):
     assert exc.value.error_code == ErrorCode.JOB_CREATION_FAILED
 
 
-# =========================================================
-# DELETE SCHEDULER
-# =========================================================
 
 def test_delete_scheduler_success(scheduler_service, mock_scheduler_client):
     scheduler_service.delete_scheduler("job-1")
@@ -95,10 +85,6 @@ def test_delete_scheduler_generic_error(scheduler_service, mock_scheduler_client
 
     assert exc.value.error_code == ErrorCode.JOB_DELETION_FAILED
 
-
-# =========================================================
-# GET SCHEDULER DETAILS
-# =========================================================
 
 def test_get_scheduler_details_success(scheduler_service, mock_scheduler_client):
     mock_scheduler_client.get_schedule.return_value = {
@@ -132,9 +118,6 @@ def test_get_scheduler_details_generic_error(scheduler_service, mock_scheduler_c
     assert exc.value.error_code == ErrorCode.INTERNAL_SERVER_ERROR
 
 
-# =========================================================
-# DEACTIVATE SCHEDULER
-# =========================================================
 
 def test_deactivate_scheduler_success(scheduler_service, mock_scheduler_client):
     mock_scheduler_client.get_schedule.return_value = {
@@ -170,9 +153,6 @@ def test_deactivate_scheduler_generic_error(scheduler_service, mock_scheduler_cl
     assert exc.value.error_code == ErrorCode.INTERNAL_SERVER_ERROR
 
 
-# =========================================================
-# ACTIVATE SCHEDULER
-# =========================================================
 
 def test_activate_scheduler_success(scheduler_service, mock_scheduler_client):
     mock_scheduler_client.get_schedule.return_value = {

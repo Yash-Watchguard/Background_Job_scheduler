@@ -7,15 +7,6 @@ from errors.error_registry import ErrorCode
 from enums.job_status import JobStatus
 
 
-# =========================================================
-# FIXTURES
-# =========================================================
-
-
-
-# =========================================================
-# CREATE JOB
-# =========================================================
 
 @patch("services.job_service.generate_uuid", return_value="job-123")
 @patch("services.job_service.validate_schedule")
@@ -47,9 +38,6 @@ def test_create_job_success(
     job_service.job_repo.put_new_job.assert_called_once()
 
 
-# =========================================================
-# GET JOB
-# =========================================================
 
 def test_get_scheduled_job(job_service, mock_job_repo):
     mock_job_repo.get_job.return_value = "job-object"
@@ -60,9 +48,6 @@ def test_get_scheduled_job(job_service, mock_job_repo):
     mock_job_repo.get_job.assert_called_once_with("user-1", "job-1")
 
 
-# =========================================================
-# GET JOB EXECUTIONS
-# =========================================================
 
 def test_get_job_executions(job_service, mock_job_repo):
     mock_job_repo.get_job_executions.return_value = ["exec1", "exec2"]
@@ -73,9 +58,7 @@ def test_get_job_executions(job_service, mock_job_repo):
     mock_job_repo.get_job_executions.assert_called_once_with("job-1")
 
 
-# =========================================================
-# DELETE JOB
-# =========================================================
+
 
 def test_delete_job_success(job_service, mock_job_repo):
     job = MagicMock()
@@ -112,9 +95,6 @@ def test_delete_job_not_found(job_service, mock_job_repo):
     assert exc.value.error_code == ErrorCode.JOB_NOT_FOUND
 
 
-# =========================================================
-# DEACTIVATE JOB
-# =========================================================
 
 def test_deactivate_job_success(job_service, mock_job_repo):
     job = MagicMock()
@@ -151,9 +131,6 @@ def test_deactivate_job_not_found(job_service, mock_job_repo):
     assert exc.value.error_code == ErrorCode.JOB_NOT_FOUND
 
 
-# =========================================================
-# ACTIVATE JOB
-# =========================================================
 
 def test_activate_job_success(job_service, mock_job_repo):
     job = MagicMock()

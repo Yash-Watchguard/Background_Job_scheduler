@@ -12,3 +12,4 @@ class ExecutionLogger:
 
     def get_logs(self) -> str:
         return self._buffer.getvalue()
+
