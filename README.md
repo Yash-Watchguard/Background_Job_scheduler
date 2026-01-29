@@ -14,7 +14,7 @@ A scalable, background job scheduling system built with FastAPI and AWS serverle
  
 The system consists of three main components:
  
-1. **REST API Service** - FastAPI application for job management and user authentication
+1. **Ecs Fargate (user interaction)** - FastAPI application for job management and user authentication
 2. **Job Worker** - Lambda function that processes scheduled jobs from SQS queue
 3. **DLQ Handler** - Lambda function that handles failed job executions
  
