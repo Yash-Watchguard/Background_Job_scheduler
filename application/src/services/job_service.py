@@ -20,19 +20,21 @@ class JobService:
         self.job_repo = job_repo
         self.scheduler_service = scheduler_service
         
-    def create_job(self, job_data:JobReqest, user_id:str):
+    def create_job(self, job_data:JobReqest, user_id:str)->str:
         
         job_id = generate_uuid()
         
         
         validate_schedule(job_data.schedule_type, job_data.job_type)
         
-        schedule_expression = get_schedule_expression(job_data.schedule_type, job_data.schedule_value)
+        schedule_expression = get_schedule_expression(job_data.schedule_type, job_data.schedule_time)
         
         self.scheduler_service.create_new_schedule(job_id,user_id,JOB_QUEUE_ARN,schedule_expression)
         
     
         self.job_repo.put_new_job(job_id,user_id,job_data)
+        
+        return job_id
         
         
     def get_scheduled_job(self,user_id , job_id)->JobRecord:

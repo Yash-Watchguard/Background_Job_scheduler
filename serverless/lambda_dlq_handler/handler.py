@@ -8,11 +8,7 @@ job_repo = JobRepo(dynamodb)
 Job_service = JobService(job_repo)
 
 def handler(event, context):
-    """
-    DLQ handler Lambda.
-    Marks execution as PERMANENT_FAILED.
-    """
-
+ 
     for record in event["Records"]:
         try:
             body = json.loads(record["body"])
@@ -22,7 +18,7 @@ def handler(event, context):
             execution_id = f"{job_id}#{message_id}"
 
             Job_service.update_execution_status(job_id,execution_id)
-            print("error handled successfully")
+
         except Exception as e:
             
             print(f"error handled error fully{str(e)} ")

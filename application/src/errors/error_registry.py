@@ -20,6 +20,7 @@ class ErrorCode:
     JOB_DELETION_FAILED = 1018
     SCHEDULE_NOT_FOUND = 1019
     JOB_UPDATE_FAILED = 1020
+    INVALID_SCHEDULE_TIME = 1021
     
     
 
@@ -87,6 +88,10 @@ ERROR_REGISTRY:Dict[int, Dict[str,Any]]={
     ErrorCode.INVALID_TOKEN:{
         "message": "Invalid token",
         "status_code":status.HTTP_401_UNAUTHORIZED
+    },
+    ErrorCode.INVALID_SCHEDULE_TIME:{
+        "message" : "Invalid schedule time",
+        "status_code" : status.HTTP_400_BAD_REQUEST
     }
     
     

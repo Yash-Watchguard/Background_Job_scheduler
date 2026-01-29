@@ -32,7 +32,7 @@ def fake_job_request():
     job_req = MagicMock()
     job_req.job_type.value = "RECURRING"
     job_req.schedule_type.value = "INTERVAL"
-    job_req.schedule_value = "*/5 * * * *"
+    job_req.schedule_time = "*/5 * * * *"
     job_req.task_type.value = "EMAIL"
 
     task_input = MagicMock()

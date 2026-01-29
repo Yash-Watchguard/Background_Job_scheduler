@@ -13,17 +13,17 @@ job_router = APIRouter()
 
 
 @job_router.post('/v1/job')
-async def create_job(job_data:JobReqest,job_service:JobService = Depends(get_job_service), jwt_payload:JwtPayload = Depends(varify_jwt) ):
+def create_job(job_data:JobReqest,job_service:JobService = Depends(get_job_service), jwt_payload:JwtPayload = Depends(varify_jwt) ):
     
     user_id = jwt_payload.user_id
     
-    job_service.create_job(job_data, user_id)
+    job_id = job_service.create_job(job_data, user_id)
     
-    return Response.success_response(status_code=status.HTTP_201_CREATED, message=SuccessMessage.JOB_CREATION)
+    return Response.success_response(status_code=status.HTTP_201_CREATED, message=SuccessMessage.JOB_CREATION,data={"job_id":job_id})
 
 
 @job_router.get('/v1/job/{job_id}')
-async def get_job(job_id:str,jwt_payload:JwtPayload= Depends(varify_jwt), job_service:JobService = Depends(get_job_service)):
+def get_job(job_id:str,jwt_payload:JwtPayload= Depends(varify_jwt), job_service:JobService = Depends(get_job_service)):
     user_id = jwt_payload.user_id
     
     job = job_service.get_scheduled_job(user_id,job_id)
@@ -31,7 +31,7 @@ async def get_job(job_id:str,jwt_payload:JwtPayload= Depends(varify_jwt), job_se
     return Response.success_response(status_code=status.HTTP_200_OK,message="ok", data=job)
 
 @job_router.get('/v1/jobs/{job_id}/executions')
-async def get_all_job_executions(job_id:str,jwt_payload:JwtPayload= Depends(varify_jwt), job_service:JobService = Depends(get_job_service)):
+def get_all_job_executions(job_id:str,jwt_payload:JwtPayload= Depends(varify_jwt), job_service:JobService = Depends(get_job_service)):
     
     job_executions = job_service.get_job_executions(job_id)
     
@@ -51,7 +51,7 @@ async def get_all_job_executions(job_id:str,jwt_payload:JwtPayload= Depends(vari
     return Response.success_response(data=result,message=SuccessMessage.JOB_EXECUTIONS_FETCH, status_code=status.HTTP_200_OK)
 
 @job_router.delete('/v1/job/{job_id}')
-async def delete_job(job_id:str, jwt_payload:JwtPayload = Depends(varify_jwt), job_service:JobService=Depends(get_job_service)):
+def delete_job(job_id:str, jwt_payload:JwtPayload = Depends(varify_jwt), job_service:JobService=Depends(get_job_service)):
     user_id = jwt_payload.user_id
     
     job_service.delete_job(job_id,user_id)
@@ -61,7 +61,7 @@ async def delete_job(job_id:str, jwt_payload:JwtPayload = Depends(varify_jwt), j
 
     
 @job_router.patch('/v1/job/{job_id}/deactivate')
-async def terminate_job(job_id:str, jwt_payload:JwtPayload = Depends(varify_jwt), job_service:JobService=Depends(get_job_service)):
+def terminate_job(job_id:str, jwt_payload:JwtPayload = Depends(varify_jwt), job_service:JobService=Depends(get_job_service)):
     user_id = jwt_payload.user_id
     
     job_service.deactivate_job(job_id,user_id)
@@ -70,7 +70,7 @@ async def terminate_job(job_id:str, jwt_payload:JwtPayload = Depends(varify_jwt)
     
     
 @job_router.patch('/v1/job/{job_id}/activate')
-async def activate_job(job_id:str, jwt_payload:JwtPayload = Depends(varify_jwt), job_service:JobService=Depends(get_job_service)):
+def activate_job(job_id:str, jwt_payload:JwtPayload = Depends(varify_jwt), job_service:JobService=Depends(get_job_service)):
     user_id = jwt_payload.user_id
     
     job_service.activate_job(job_id,user_id)

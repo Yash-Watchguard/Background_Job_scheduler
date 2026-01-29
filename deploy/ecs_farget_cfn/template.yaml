@@ -24,6 +24,38 @@ Parameters:
     Type: String
     Description: IAM role ARN used by EventBridge Scheduler target
 
+
+
+  JwtSecretKey:
+    Type: String
+    NoEcho: true
+    Description: JWT secret key
+
+  JwtAlgorithm:
+    Type: String
+    Default: HS256
+
+  JwtExpiryTime:
+    Type: String
+    Default: "24"
+
+  DynamoTableName:
+    Type: String
+    Default: Job_Records
+
+  BgJobQueueArn:
+    Type: String
+    Description: SQS background job queue ARN
+
+  EventBridgeRoleArn:
+    Type: String
+    Description: EventBridge Scheduler IAM role ARN
+
+  ScheduleGroupName:
+    Type: String
+    Default: bg-job-scheduler-group
+
+
 Resources:
 
   LogGroup:
@@ -31,7 +63,6 @@ Resources:
     Properties:
       LogGroupName: /ecs/bg-job-scheduler
       RetentionInDays: 14
-
 
   TaskExecutionRole:
     Type: AWS::IAM::Role
@@ -89,12 +120,10 @@ Resources:
                   - scheduler:ListSchedules
                 Resource: "*"
 
-              
               - Effect: Allow
                 Action:
                   - iam:PassRole
                 Resource: !Ref SchedulerRoleArn
-
 
   AlbSG:
     Type: AWS::EC2::SecurityGroup
@@ -110,7 +139,6 @@ Resources:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
 
-
   ServiceSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -124,8 +152,6 @@ Resources:
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
-
-
 
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -171,6 +197,21 @@ Resources:
           Image: !Ref ContainerImage
           PortMappings:
             - ContainerPort: 8000
+          Environment:
+            - Name: JWT_SECRET_KEY
+              Value: !Ref JwtSecretKey
+            - Name: JWT_ALGORITHM
+              Value: !Ref JwtAlgorithm
+            - Name: JWT_EXPIRY_TIME
+              Value: !Ref JwtExpiryTime
+            - Name: DYNAMO_TABLE_NAME
+              Value: !Ref DynamoTableName
+            - Name: BG_JOB_QUEUE_ARN
+              Value: !Ref BgJobQueueArn
+            - Name: EVENT_BRIDGE_ROLE_ARN
+              Value: !Ref EventBridgeRoleArn
+            - Name: SCHEDULE_GROUP_NAME
+              Value: !Ref ScheduleGroupName
           LogConfiguration:
             LogDriver: awslogs
             Options:

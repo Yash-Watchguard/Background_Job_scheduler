@@ -20,7 +20,7 @@ def test_create_job_success(
     job_data = MagicMock()
     job_data.schedule_type = "INTERVAL"
     job_data.job_type = "RECURRING"
-    job_data.schedule_value = "*/5 * * * *"
+    job_data.schedule_time = "*/5 * * * *"
 
     job_service.create_job(job_data, user_id="user-1")
 
@@ -31,7 +31,7 @@ def test_create_job_success(
 
     mock_get_expression.assert_called_once_with(
         job_data.schedule_type,
-        job_data.schedule_value
+        job_data.schedule_time
     )
 
     job_service.scheduler_service.create_new_schedule.assert_called_once()

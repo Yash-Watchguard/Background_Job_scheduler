@@ -16,7 +16,7 @@ class TestJobAPI:
         payload = {
             "job_type": "RECURRING",
             "schedule_type": "INTERVAL",
-            "schedule_value": "*/4 * * * ? *",
+            "schedule_time": "*/4 * * * ? *",
             "task_type": "EMPLOYEE_ONE_TIME_NOTIFICATION",
             "task_input": {
                 "to": ["test@gmail.com"],
@@ -51,7 +51,7 @@ class TestJobAPI:
         payload = {
             "job_type": "RECURRING",
             "schedule_type": "INTERVAL",
-            "schedule_value": "*/4 * * * ? *",
+            "schedule_time": "*/4 * * * ? *",
             "task_type": "EMPLOYEE_ONE_TIME_NOTIFICATION",
             "task_input": {
                 "to": ["test@gmail.com"],

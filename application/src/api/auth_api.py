@@ -11,7 +11,7 @@ from constants.success_message import SuccessMessage
 auth_router = APIRouter()
 
 @auth_router.post("/v1/auth/login")
-async def login(
+def login(
     request: LoginRequest,
     auth_service: AuthService = Depends(get_auth_service),
 ):
@@ -25,7 +25,7 @@ async def login(
 
 
 @auth_router.post("/v1/auth/signup")
-async def signup(
+def signup(
     request: SignupRequest,
     auth_srvice: AuthService = Depends(get_auth_service),
 ):

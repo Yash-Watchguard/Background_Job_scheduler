@@ -12,7 +12,7 @@ class JobRecord(BaseModel):
     job_id: str = Field(alias="JobId")
     job_type: JobType = Field(alias="JobType")
     schedule_type: ScheduleType = Field(alias="ScheduleType")
-    schedule_value: str = Field(alias="ScheduleValue")
+    schedule_time: str = Field(alias="ScheduleValue")
     task_type:TaskType = Field(alias="TaskType")
     task_input:TaskInput = Field(alias="TaskInput")
     created_at: datetime = Field(alias="CreatedAt")

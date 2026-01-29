@@ -1,7 +1,7 @@
 from models.user_model import User
 from errors.app_exception import AppException
 from errors.error_registry import ErrorCode
-from helper.serializer_deserializer import dynamo_to_model
+from helper.deserializer import dynamo_to_model
 
 
 class UserRepo:

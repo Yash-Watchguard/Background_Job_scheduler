@@ -30,8 +30,6 @@ def create_jwt_token(user_id: str) -> str:
     return token
 
 def varify_jwt(credentials : HTTPAuthorizationCredentials= Depends(security))->JwtPayload:
-    secret_key: str = os.getenv("JWT_SECRET_KEY").encode('utf-8')
-    algo: str = os.getenv("JWT_ALGORITHM")
     token = credentials.credentials
     
     try:

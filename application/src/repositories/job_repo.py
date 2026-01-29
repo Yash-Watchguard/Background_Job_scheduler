@@ -9,13 +9,13 @@ from errors.app_exception import AppException
 from models.job_execution_model import ExecutionModel
 from typing import List
 
-from helper.serializer_deserializer import dynamo_to_model
+from helper.deserializer import dynamo_to_model
 from schemas.job import JobReqest
 from datetime import datetime
 from enums.job_status import JobStatus
 from models.job_model import JobRecord
-from helper.serializer_deserializer import dynamo_to_model
 from errors.error_registry import ErrorCode
+from asyncio import to_thread
 
 
 class JobRepo:
@@ -60,7 +60,7 @@ class JobRepo:
             {"S": job_id},
             {"S": job_request.job_type.value},
             {"S": job_request.schedule_type.value},
-            {"S": job_request.schedule_value},
+            {"S": job_request.schedule_time},
             {"S": job_request.task_type.value},
             {
                 "M": {
@@ -95,13 +95,13 @@ class JobRepo:
             SELECT * FROM "{self.table_name}" WHERE pk = ? AND sk = ?
         '''
         try:
-            response = self.dynamo_db.execute_statement(
+            response = to_thread(lambda: self.dynamo_db.execute_statement(
                 Statement=statement,
                 Parameters=[
                     {"S":f"USER#{user_id}"},
                     {"S": f"JOBS#{job_id}"}
                 ]
-            )
+            ))
             
             items = response["Items"]
             

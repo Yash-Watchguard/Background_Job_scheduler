@@ -10,6 +10,11 @@ from models.job_model import JobRecord
 from services.log_service import LogService
 from enums.execution_status import ExecutionStatus
 from datetime import datetime, timezone
+import logging 
+logger  = logging.getLogger(__name__)
+
+logger.setLevel(logging.INFO)
+
 
 
 job_repo = JobRepo()
@@ -20,6 +25,7 @@ job_service: JobService = JobService(job_repo)
 
 
 def handler(event, context):
+    logger.info("lambda execution started")
 
     for record in event["Records"]:
         execution_logger = ExecutionLogger()
@@ -32,7 +38,7 @@ def handler(event, context):
         receive_count = int(record["attributes"]["ApproximateReceiveCount"])
 
         execution_id = f"{job_id}#{message_id}"
-
+        logger.info(f"Processing job_id={job_id}, execution_id={execution_id}, attempt={receive_count}")
         execution_logger.log(
             f"Processing job_id={job_id}, execution_id={execution_id}, attempt={receive_count}"
         )
@@ -53,11 +59,13 @@ def handler(event, context):
                 retry_count=receive_count - 1,
                 finished_at=None
             )
+            logger.info("Executon retry detected")
             execution_logger.log("Execution retry detected")
             
         try:
 
             job: JobRecord = job_service.get_job(job_id, user_id)
+            logger.info("Fetched job metadata")
             execution_logger.log("Fetched job metadata")
 
             execution_logger.log(f"Execution task {job.task_type}")
@@ -67,7 +75,8 @@ def handler(event, context):
                 subject=job.task_input.subject,
                 body=job.task_input.content,
             )
-
+            
+            logger.info("Task executes successfully")
             execution_logger.log("Task executes successfully")
             log_url = log_service.upload_log(
                 job_id, execution_id, execution_logger.get_logs()
@@ -83,6 +92,7 @@ def handler(event, context):
             )
             
         except Exception as e:
+            logger.info(f"Job failed: {str(e)}")
             execution_logger.log(f"Job failed: {str(e)}")
             log_url = log_service.upload_log(
                     job_id, execution_id, execution_logger.get_logs()
