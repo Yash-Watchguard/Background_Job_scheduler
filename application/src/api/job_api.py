@@ -12,7 +12,7 @@ from constants.success_message import SuccessMessage
 job_router = APIRouter()
 
 
-@job_router.post('/v1/job')
+@job_router.post('/v1/jobs')
 def create_job(job_data:JobReqest,job_service:JobService = Depends(get_job_service), jwt_payload:JwtPayload = Depends(varify_jwt) ):
     
     user_id = jwt_payload.user_id
@@ -22,7 +22,7 @@ def create_job(job_data:JobReqest,job_service:JobService = Depends(get_job_servi
     return Response.success_response(status_code=status.HTTP_201_CREATED, message=SuccessMessage.JOB_CREATION,data={"job_id":job_id})
 
 
-@job_router.get('/v1/job/{job_id}')
+@job_router.get('/v1/jobs/{job_id}')
 def get_job(job_id:str,jwt_payload:JwtPayload= Depends(varify_jwt), job_service:JobService = Depends(get_job_service)):
     user_id = jwt_payload.user_id
     
@@ -50,7 +50,7 @@ def get_all_job_executions(job_id:str,jwt_payload:JwtPayload= Depends(varify_jwt
         
     return Response.success_response(data=result,message=SuccessMessage.JOB_EXECUTIONS_FETCH, status_code=status.HTTP_200_OK)
 
-@job_router.delete('/v1/job/{job_id}')
+@job_router.delete('/v1/jobs/{job_id}')
 def delete_job(job_id:str, jwt_payload:JwtPayload = Depends(varify_jwt), job_service:JobService=Depends(get_job_service)):
     user_id = jwt_payload.user_id
     
@@ -60,7 +60,7 @@ def delete_job(job_id:str, jwt_payload:JwtPayload = Depends(varify_jwt), job_ser
 
 
     
-@job_router.patch('/v1/job/{job_id}/deactivate')
+@job_router.patch('/v1/jobs/{job_id}/deactivate')
 def terminate_job(job_id:str, jwt_payload:JwtPayload = Depends(varify_jwt), job_service:JobService=Depends(get_job_service)):
     user_id = jwt_payload.user_id
     
@@ -69,7 +69,7 @@ def terminate_job(job_id:str, jwt_payload:JwtPayload = Depends(varify_jwt), job_
     return Response.success_response(status_code=status.HTTP_200_OK,message="job terminated successfully" , data=None)
     
     
-@job_router.patch('/v1/job/{job_id}/activate')
+@job_router.patch('/v1/jobs/{job_id}/activate')
 def activate_job(job_id:str, jwt_payload:JwtPayload = Depends(varify_jwt), job_service:JobService=Depends(get_job_service)):
     user_id = jwt_payload.user_id
     

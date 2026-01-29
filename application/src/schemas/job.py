@@ -9,11 +9,11 @@ from errors.app_exception import AppException
 from croniter import croniter
 
 class JobReqest(BaseModel):
-    job_type:JobType = Field(...)
-    schedule_type:ScheduleType = Field(...)
-    schedule_time:str = Field(...)
-    task_type:TaskType = Field(...)
-    task_input:TaskInput = Field(...)
+    job_type:JobType
+    schedule_type:ScheduleType 
+    schedule_time:str 
+    task_type:TaskType 
+    task_input:TaskInput 
     
     model_config = ConfigDict(
         extra="forbid",

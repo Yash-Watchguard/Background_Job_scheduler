@@ -27,7 +27,7 @@ Resources:
       FunctionName: bg-job-worker
       Runtime: python3.10
       Handler: handler.handler
-      CodeUri: ../lambda_worker
+      CodeUri: lambda_worker
       Timeout: 300
       MemorySize: 512
 
@@ -79,7 +79,7 @@ Resources:
       FunctionName: bg-job-dlq-handler
       Runtime: python3.10
       Handler: handler.handler
-      CodeUri: ../lambda_dlq_handler
+      CodeUri: lambda_dlq_handler
       Timeout: 30
       MemorySize: 256
 

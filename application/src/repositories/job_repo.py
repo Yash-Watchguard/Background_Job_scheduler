@@ -95,13 +95,13 @@ class JobRepo:
             SELECT * FROM "{self.table_name}" WHERE pk = ? AND sk = ?
         '''
         try:
-            response = to_thread(lambda: self.dynamo_db.execute_statement(
+            response =  self.dynamo_db.execute_statement(
                 Statement=statement,
                 Parameters=[
                     {"S":f"USER#{user_id}"},
                     {"S": f"JOBS#{job_id}"}
                 ]
-            ))
+            )
             
             items = response["Items"]
             
