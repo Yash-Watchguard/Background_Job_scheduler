@@ -163,8 +163,7 @@ Background_Job_scheduler/
  
 The system uses a single-table design with composite keys:
 
- 
-![alt text](image.png)
+ ![alt text](image.png)
  
 **Access Patterns**:
 - Create new user
