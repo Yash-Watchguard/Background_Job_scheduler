@@ -20,7 +20,7 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: bg-job-queue
-      VisibilityTimeout: 300   # 5 minutes (adjust to job runtime)
+      VisibilityTimeout: 300   
 
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt JobDLQ.Arn

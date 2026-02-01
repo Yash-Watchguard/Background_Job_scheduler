@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: BG Job Scheduler - FastAPI ECS Fargate Service with ALB (HTTP Only)
+Description: BG Job Scheduler - FastAPI ECS Fargate Service with ALB 
 
 Parameters:
   VpcId:
@@ -23,7 +23,6 @@ Parameters:
   SchedulerRoleArn:
     Type: String
     Description: IAM role ARN used by EventBridge Scheduler target
-
 
 
   JwtSecretKey:

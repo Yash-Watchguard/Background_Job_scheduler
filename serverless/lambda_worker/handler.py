@@ -26,6 +26,7 @@ job_service: JobService = JobService(job_repo)
 
 def handler(event, context):
     logger.info("lambda execution started")
+    batch_item_failures = [] 
 
     for record in event["Records"]:
         execution_logger = ExecutionLogger()
@@ -107,6 +108,12 @@ def handler(event, context):
                 finished_at=datetime.now(timezone.utc).isoformat()
             )
 
-            raise
+            batch_item_failures.append({
+                "itemIdentifier": message_id
+            })
+            
+        return {
+            "batchItemFailures" : batch_item_failures
+        }
                 
 
