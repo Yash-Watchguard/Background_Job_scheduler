@@ -38,6 +38,8 @@ Resources:
             Queue: !Ref QueueArn
             BatchSize: 10
             Enabled: true
+            FunctionResponseTypes:     
+              - ReportBatchItemFailures
 
       Policies:
         - AWSLambdaBasicExecutionRole
