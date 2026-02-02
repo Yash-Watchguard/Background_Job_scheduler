@@ -20,5 +20,4 @@ def handler(event, context):
             Job_service.update_execution_status(job_id,execution_id)
 
         except Exception as e:
-            
-            print(f"error handled error fully{str(e)} ")
+            pass

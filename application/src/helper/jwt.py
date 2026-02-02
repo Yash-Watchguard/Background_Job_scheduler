@@ -15,7 +15,7 @@ security = HTTPBearer()
 
 def create_jwt_token(user_id: str) -> str:
     
-   
+
     payload = JwtPayload(
         authorized= "true",       
         user_id= user_id,          

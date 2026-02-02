@@ -64,7 +64,6 @@ def handler(event, context):
             execution_logger.log("Execution retry detected")
             
         try:
-
             job: JobRecord = job_service.get_job(job_id, user_id)
             logger.info("Fetched job metadata")
             execution_logger.log("Fetched job metadata")
